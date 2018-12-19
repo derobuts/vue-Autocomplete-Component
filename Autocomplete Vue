@@ -1,0 +1,117 @@
+<template>
+  <div class="autocomplete">
+    <input
+      type="text"
+      @keyup.up="keyup"
+      @keydown.down="keydown"
+      @keydown.enter="EnteredKeyitem"
+      @input="InputChange($event.target.value)"
+      v-model="selecteditem"
+      placeholder="Search For Event,Venues & Artists"
+    >
+    <ul class="autocomplete-results" ref="resultslists" v-show="true">
+      <li
+        v-for="(searchresult,index) in result"
+        :class="{'selected':(selected == index)}"
+        @click="itemclicked(index)"
+        :key="searchresult.index"
+      >{{searchresult}}</li>
+    </ul>
+  </div>
+</template>
+<script>
+export default {
+  name: "autocomplete",
+  props: {
+    searchresults: {
+      type: Array,
+      required: false,
+      default: () => ["de", "h"]
+    }
+  },
+  data() {
+    return {
+      result: this.searchresults,
+      itemheight: 29,
+      selecteditem: "",
+      search: "",
+      selected: -1,
+      query: "der",
+      resultvisisble: false
+    };
+  },
+  methods: {
+    itemclicked(index) {
+      this.selected = index;
+      this.selecteditem = this.result[index];
+      console.log(this.result[index]);
+    },
+    EnteredKeyitem() {
+      this.selecteditem = this.result[this.selected];
+    },
+    scrollToItem() {
+      this.$refs.resultslists.scrollTop = this.selected * this.itemheight;
+    },
+    keyup() {
+      //if user clicks down
+      //check if index is > 0 means the only way is up :)
+      if (this.selected == 0) {
+        return;
+      }
+      this.selected -= 1;
+      this.scrollToItem();
+    },
+    keydown() {
+      if (this.selected >= this.result.length - 1) {
+        return;
+      }
+
+      this.selected += 1;
+      this.scrollToItem();
+    },
+    InputChange(e) {
+      this.$emit("InputChanged", this.selecteditem);
+    }
+  },
+  computed: {}
+};
+</script>
+
+<style scoped>
+.autocomplete {
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+.autocomplete input {
+  height: 40px;
+  border-radius: 3px;
+  border: 2px solid lightgray;
+  box-shadow: 0 0 10px lightgray;
+  font-size: 24px;
+  width: 100%;
+}
+.autocomplete-results {
+  padding: 0;
+  margin: 0;
+  border: 1px solid #eeeeee;
+  background: #fff;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.autocomplete-result {
+  background-color: #4aae9b;
+  color: white;
+}
+.autocomplete-results li {
+  border-bottom: 1px solid lightgray;
+  list-style: none;
+  text-align: left;
+  padding: 5px 4px;
+  cursor: pointer;
+}
+.selected {
+  background-color: #4aae9b;
+}
+</style>
